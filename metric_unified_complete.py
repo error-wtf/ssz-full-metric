@@ -234,7 +234,7 @@ class MetricSSZ:
         where σ(r) is sigmoid function centered at r_φ.
         """
         # Parameters
-        A_min = 1e-6  # Minimum allowed value
+        A_min = 0.08  # Minimum allowed value (optimized for stability)
         k = 10.0 / self.r_phi  # Steepness (transition over 0.2×r_φ)
         r0 = self.r_phi  # Center of transition
         
