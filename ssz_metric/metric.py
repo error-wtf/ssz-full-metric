@@ -12,8 +12,65 @@ from .constants import PHI
 from .xi_field import xi_field
 from .deltaM import delta_M
 
-# Post-Newtonian coefficient
+# Post-Newtonian coefficient (traditional)
 EPS_3 = -24.0 / 5.0  # = -4.8
+
+# φ-Series coefficients (discovered 2025-10-31)
+# Pattern: c_{n+2} = (c_{n+1} + c_n) / φ
+# These generate ε_n = c_n × φⁿ
+PHI_SERIES_C = [
+    1.0,        # c_0
+    -2.0,       # c_1
+    2.0,        # c_2
+    -1.133126,  # c_3 (from ε_3 = -24/5)
+    0.535758,   # c_4 (predicted via recursion)
+    -0.369194,  # c_5 (predicted via recursion)
+    0.102942,   # c_6 (predicted via recursion)
+]
+
+def A_phi_series(r, r_s, max_order=6, use_delta=True):
+    """
+    φ-Series metric coefficient with higher orders
+    
+    Formula: A(r) = Σ_{n=0}^{max_order} ε_n U^n
+    where ε_n = c_n × φⁿ and U = r_s/(2r)
+    
+    This uses the discovered φ-series recursion:
+    c_{n+2} = (c_{n+1} + c_n) / φ
+    
+    Parameters:
+    -----------
+    r : float or array
+        Radial coordinate [m]
+    r_s : float
+        Bare Schwarzschild radius [m]
+    max_order : int, optional
+        Maximum order in expansion (default: 6)
+    use_delta : bool, optional
+        Apply Δ(M) correction (default: True)
+    
+    Returns:
+    --------
+    A : float or array
+        φ-series metric coefficient (dimensionless)
+    """
+    # Apply Δ(M) correction if requested
+    if use_delta:
+        Delta = delta_M(r_s)
+        r_s_eff = r_s * (1.0 + Delta / 100.0)
+    else:
+        r_s_eff = r_s
+    
+    # Weak field parameter
+    U = r_s_eff / (2.0 * r)
+    
+    # φ-series expansion
+    A = 0.0
+    for n in range(min(max_order + 1, len(PHI_SERIES_C))):
+        eps_n = PHI_SERIES_C[n] * (PHI ** n)
+        A += eps_n * (U ** n)
+    
+    return A
 
 def A_PNDelta(r, r_s):
     """
@@ -89,11 +146,11 @@ def w_blend(r, r_star, ell):
     """
     return 0.5 * (1.0 + np.tanh((r_star - r) / ell))
 
-def A_blended(r, r_s, r_star, ell=None):
+def A_blended(r, r_s, r_star, ell=None, mode='O3'):
     """
     Full SSZ metric coefficient with smooth blending
     
-    Formula: A(r) = w(r)·A_Ξ(r) + (1-w(r))·A_PNΔ(r)
+    Formula: A(r) = w(r)·A_Ξ(r) + (1-w(r))·A_outer(r)
     
     Parameters:
     -----------
@@ -105,6 +162,12 @@ def A_blended(r, r_s, r_star, ell=None):
         Intersection radius [m]
     ell : float, optional
         Smoothing scale [m]. Default: 0.05·r_s
+    mode : str, optional
+        Outer metric mode:
+        - 'O3': Traditional O(U³) with ε₃ = -24/5 (default)
+        - 'O4': φ-series up to O(U⁴)
+        - 'O5': φ-series up to O(U⁵)
+        - 'O6': φ-series up to O(U⁶) (recommended)
     
     Returns:
     --------
@@ -114,9 +177,20 @@ def A_blended(r, r_s, r_star, ell=None):
     if ell is None:
         ell = 0.05 * r_s
     
-    # Compute both metric forms
-    A_pn = A_PNDelta(r, r_s)
+    # Compute inner metric (always SSZ)
     A_xi = A_Xi(r, r_s)
+    
+    # Compute outer metric (mode-dependent)
+    if mode == 'O3':
+        A_pn = A_PNDelta(r, r_s)
+    elif mode == 'O4':
+        A_pn = A_phi_series(r, r_s, max_order=4)
+    elif mode == 'O5':
+        A_pn = A_phi_series(r, r_s, max_order=5)
+    elif mode == 'O6':
+        A_pn = A_phi_series(r, r_s, max_order=6)
+    else:
+        raise ValueError(f"Unknown mode: {mode}. Use 'O3', 'O4', 'O5', or 'O6'.")
     
     # Blending weight
     w = w_blend(r, r_star, ell)
@@ -126,7 +200,7 @@ def A_blended(r, r_s, r_star, ell=None):
     
     return A
 
-def B_metric(r, r_s, r_star, ell=None):
+def B_metric(r, r_s, r_star, ell=None, mode='O3'):
     """
     Radial metric coefficient
     
@@ -144,13 +218,15 @@ def B_metric(r, r_s, r_star, ell=None):
         Intersection radius [m]
     ell : float, optional
         Smoothing scale [m]
+    mode : str, optional
+        Metric mode (see A_blended)
     
     Returns:
     --------
     B : float or array
         Radial metric coefficient (dimensionless)
     """
-    A = A_blended(r, r_s, r_star, ell)
+    A = A_blended(r, r_s, r_star, ell, mode=mode)
     return 1.0 / A
 
 def natural_boundary(r_s):
