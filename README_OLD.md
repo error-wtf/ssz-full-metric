@@ -39,138 +39,76 @@ Black holes WITHOUT singularities • All paradoxes resolved • Production-read
 
 ---
 
-## 🚀 What Makes This Special
+## 🌟 Features
 
-### The Breakthrough
-For the first time in history, we have a **mathematically consistent, physically valid solution** for black holes that:
-- Eliminates singularities completely
-- Preserves all information
-- Resolves all known paradoxes
-- Matches GR in the far-field
-- Is based on fundamental geometry (φ)
-
-### Why It Matters
-Black holes have plagued physics for 109 years. The singularity problem seemed insurmountable. This solution changes everything.
-
-> "Not just a metric - a paradigm shift" - From 28 hours of breakthrough research
-
-## 🌟 Core Features
-
-### Mathematical
-- ✅ **Singularity-Free** - A(r) > 0 everywhere (A_min = 0.284 > 0)
-- ✅ **Natural Boundary** - Physical limit at r_φ = 0.825 r_s (no singularity!)
-- ✅ **φ-Series** - All coefficients from golden ratio recursion: c_{n+2} = (c_{n+1}+c_n)/φ
-- ✅ **Universal Constant** - u* = 1.3865616 independent of mass
-- ✅ **C² Smooth** - Continuous up to second derivatives
-- ✅ **GR Recovery** - Matches General Relativity in weak field
-
-### Physical
-- ✅ **Information Preserved** - Stored in segment structure
-- ✅ **Exotic Matter** - Required & identified (ρ > 0, p_r < 0)
-- ✅ **No White Holes** - Asymmetry built into geometry
-- ✅ **No Wormholes** - Topologically forbidden
-- ✅ **Finite Evolution** - Finite time to natural boundary
-- ✅ **Stable** - Black hole bomb suppressed (×6.6 damping)
-
-### Computational
-- ✅ **Production Ready** - Full Python package
-- ✅ **Validated** - 6/6 core tests passing
-- ✅ **Documented** - 57 comprehensive reports
-- ✅ **Extensible** - Mode selection O(U³) to O(U⁶)
-- ✅ **Cross-platform** - Windows, Linux, macOS
+- ✅ **Singularitätenfrei**: A(r) > 0 überall durch Softplus-Floor
+- ✅ **Glatter Übergang**: C^∞-Glätte am Schnittpunkt r* (tanh-Blend)
+- ✅ **GR-kompatibel**: PPN-Limit im Fernfeld (β=γ=1)
+- ✅ **φ-basiert**: Golden Ratio φ ≈ 1.618... als geometrisches Fundament
+- ✅ **Vollständig getestet**: 6 pytest-Tests validieren alle Kernaussagen
+- ✅ **Visualisierung**: CLI-Tool generiert animierte GIFs
+- ✅ **Cross-platform**: Windows, Linux, macOS (CI-getestet)
 
 ---
 
-## 📐 Mathematical Foundation
+## 📐 Mathematische Grundlagen
 
-### The φ-Series Discovery
-
-All Post-Newtonian coefficients follow a golden ratio recursion:
+### Segment-Dichte (KORREKTE Formel)
 
 ```
-c_{n+2} = (c_{n+1} + c_n) / φ
-
-where φ = (1+√5)/2 ≈ 1.618033988749...
+Ξ(r) = Ξ_max · (1 - exp(-φ · r/r_s))
 ```
 
-**Generated Coefficients:**
+- `φ = (1+√5)/2 ≈ 1.618033988749...` (Golden Ratio)
+- `r_s = 2GM/c²` (Schwarzschild-Radius)
+- `Ξ_max = 1.0` (Sättigung)
+
+### Zeitdilatation
+
+**SSZ:**
 ```
-c_0 = 1.0      → ε_0 = 1.0
-c_1 = -2.0     → ε_1 = -3.236
-c_2 = 2.0      → ε_2 = 5.236
-c_3 = -1.133   → ε_3 = -4.800  (matches GR!)
-c_4 = 0.536    → ε_4 = 3.672   (predicted)
-c_5 = -0.369   → ε_5 = -4.094  (predicted)
-c_6 = 0.103    → ε_6 = 1.847   (predicted)
+D_SSZ(r) = 1 / (1 + Ξ(r))
 ```
 
-### Segment Density
+**GR:**
+```
+D_GR(r) = √(1 - r_s/r)
+```
 
+### Universeller Schnittpunkt r*
+
+Am Schnittpunkt gilt: `D_SSZ(r*) = D_GR(r*)`
+
+**Referenzwerte:**
+- **φ = 1.0**: `u* = r*/r_s ≈ 1.4689714056`, `D* ≈ 0.5650235`
+- **φ = φ**: `u* ≈ 1.3866`, `D* ≈ 0.5280`
+
+### Mirror-Metrik
+
+**Linienelement:**
+```
+ds² = -A_safe(r) dt² + B_safe(r) dr² + r²dΩ²
+```
+
+**Koeffizienten:**
 ```python
-Ξ(r) = 1 - exp(-φ · r/r_s)
+# 1. Übergangsweiche (tanh)
+h(r) = 0.5 * (1 - tanh((r - r*)/Δ))
+
+# 2. Mirror-Blend
+A_mix = h·A_SSZ + (1-h)·A_GR
+
+# 3. Softplus-Floor (garantiert A > 0)
+A_safe = ε + (1/β)·ln(1 + exp(β·(A_mix - ε)))
+
+# 4. Radial-Komponente
+B_safe = 1/A_safe
 ```
 
-**Physical Meaning:** Discrete spacetime structure, no continuum singularity
-
-### Time Dilation
-
-**SSZ (Inner):**
-```python
-D_SSZ(r) = 1 / (1 + Ξ(r))  # Always finite!
-```
-
-**GR (Outer):**
-```python
-D_GR(r) = √(1 - r_s/r)  # Singular at r_s
-```
-
-### Universal Intersection
-
-At r* both metrics match: `D_SSZ(r*) = D_GR(r*)`
-
-**Result:**
-```
-u* = r*/r_s = 1.3865616196...
-```
-
-**Properties:**
-- ✅ Mass-independent (tested: M☉ to 10⁹M☉)
-- ✅ Error: 3.8×10⁻⁷ (extraordinary precision!)
-- ✅ Fundamental constant of nature
-
-### Complete Metric
-
-**Line Element:**
-```
-ds² = -A(r)c²dt² + B(r)dr² + r²dΩ²
-```
-
-**where:**
-```python
-# Inner metric (r < r*): SSZ
-A_Ξ(r) = (1 + Ξ(r))^(-2) = D_SSZ²
-
-# Outer metric (r > r*): φ-series
-A_φ(r) = Σ_{n=0}^6 ε_n (r_s/2r)^n
-
-# Smooth blend
-w(r) = 0.5(1 + tanh((r* - r)/ℓ))
-A(r) = w(r)·A_Ξ(r) + (1-w(r))·A_φ(r)
-
-# Radial component
-B(r) = 1/A(r)
-```
-
-**Natural Boundary:**
-```python
-r_φ = (φ/2) × r_s × (1 + Δ(M)/100)
-   = 0.825 r_s  (for solar mass)
-```
-
-**Key Property:**
-- A(r_φ) = 0.284 > 0  ← NO SINGULARITY!
-- A(r) > 0 everywhere
-- Finite curvature at all points
+**Parameter:**
+- `Δ = 0.02·r*` (Übergangsbreite)
+- `ε = 10⁻⁶` (Floor-Offset)
+- `β = 50` (Softplus-Steilheit)
 
 ---
 
@@ -179,83 +117,45 @@ r_φ = (φ/2) × r_s × (1 + Δ(M)/100)
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/ssz-full-metric.git
+git clone https://github.com/error-wtf/ssz-full-metric.git
 cd ssz-full-metric
-
-# Install dependencies
-pip install numpy scipy matplotlib mpmath
-
-# Verify installation
-python -c "from ssz_metric import *; print('SSZ Metric installed successfully!')"
+pip install -r viz_ssz_metric/requirements.txt
 ```
 
-## 💻 Usage
-
-### Quick Start
-
-```python
-from ssz_metric import *
-
-# Setup
-M = M_SUN  # Solar mass
-r_s = schwarzschild_radius(M)
-r_star, u_star = find_intersection(r_s)
-
-# Compute metric at 5 Schwarzschild radii
-r = 5 * r_s
-A = A_blended(r, r_s, r_star, mode='O6')  # φ-series O(U⁶)
-B = B_metric(r, r_s, r_star, mode='O6)
-
-print(f"At r = {r/r_s:.1f}r_s:")
-print(f"  A(r) = {A:.6f}")
-print(f"  B(r) = {B:.6f}")
-print(f"  No singularity: A > 0 everywhere!")
-```
-
-### Run Tests
+### Schnelltest
 
 ```bash
-# Core property tests
-python tests/test_intersection.py
-python tests/test_metric_properties.py
+# Schnittpunkte prüfen
+python -m viz_ssz_metric.sszviz_cli check --varphis 1.0 1.61803398875
 
-# φ-series integration test  
-python test_phi_series_integration.py
+# Tests ausführen
+pytest -q viz_ssz_metric/tests/
 
-# Stress-energy tensor
-python compute_stress_energy_numerical.py
-
-# Energy conditions
-python validate_energy_conditions.py
+# GIFs generieren
+python -m viz_ssz_metric.sszviz_cli gif --kind all --varphi 1.0
 ```
 
-**Expected Output:**
+**Erwartete Ausgabe:**
 
 ```
 ================================================================================
-INTERSECTION TEST
+SSZ-GR INTERSECTION CHECK
 ================================================================================
 
-System: M = 1.988e+30 kg (Solar mass)
-Schwarzschildradius: r_s = 2.953 km
+φ = 1.0000000000
+  u* = r*/r_s = 1.4689714056
+  r* = 1.468971e+00 (in units of r_s)
+  D*(SSZ) = 0.5650234932
+  D*(GR)  = 0.5650234932
+  |Diff|  = 1.78e-10
 
-Intersection Point:
-  u* = 1.3865616 (canonical: 1.386562)
-  Error: |u* - canonical| = 3.8e-07  ← EXTRAORDINARY!
-  r* = 4.095 km = 1.387 r_s
+φ = 1.6180339887
+  u* = r*/r_s = 1.3865620341
+  r* = 1.386562e+00 (in units of r_s)
+  D*(SSZ) = 0.5280070096
+  D*(GR)  = 0.5280070096
+  |Diff|  = 7.77e-11
 
-Time Dilation at r*:
-  D_SSZ(r*) = 0.528007
-  D_GR(r*)  = 0.528007
-  Match: PERFECT (1e-10 precision)
-
-Natural Boundary:
-  r_φ = 0.825 r_s = 2.437 km
-  A(r_φ) = 0.284 > 0  ← NO SINGULARITY!
-
-================================================================================
-RESULT: PASS ✓
 ================================================================================
 ```
 
